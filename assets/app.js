@@ -215,6 +215,15 @@ function renderShell() {
 }
 
 function renderMain(counts) {
+  // Bloqueado: hay URL pero todavía no se ingresó la contraseña
+  if (apiConfigured() && !state.secret) {
+    return `<div class="empty" style="padding-top:120px">
+      <div class="em-ico">🔒</div>
+      <h3>Contenido protegido</h3>
+      <p>Ingresá la contraseña compartida para ver y editar el mundo.</p>
+      <button class="btn btn-gold" data-action="unlock">🔑 Ingresar contraseña</button>
+    </div>`;
+  }
   if (state.loading && !state.entries.length) {
     return `<div class="empty"><div class="em-ico">🕯️</div><h3>Consultando el códice…</h3></div>`;
   }
@@ -400,6 +409,7 @@ function bindShell() {
     else if (action === "delete") confirmDelete(t.dataset.id);
     else if (action === "back") go({ type: "category", category: (state.entries.find((x) => x.id === state.view.id) || {}).category || CONFIG.categories[0].id });
     else if (action === "reload") loadEntries();
+    else if (action === "unlock") openWelcomeModal();
     else if (action === "settings") openSetupModal(true);
     else if (action === "change-user") openAuthorModal();
     else if (action === "toggle-menu") toggleMenu();
@@ -515,6 +525,58 @@ function openSetupModal(fromSettings) {
       btn.disabled = false; btn.textContent = "Conectar";
     }
   });
+}
+
+/* ---------- Bienvenida / desbloqueo (nombre + contraseña) ---------- */
+function openWelcomeModal() {
+  overlay(`
+    <div class="modal narrow">
+      <div class="modal-head"><h2>🔑 Entrar</h2>
+        <p>Bienvenido a <strong>${escapeHtml(CONFIG.siteName)}</strong>. Ingresá tu nombre y la contraseña compartida para abrir el códice.</p></div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Tu nombre</label>
+          <input id="wc-name" type="text" placeholder="Ej: Joaquín" value="${attr(state.author)}" maxlength="40" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label>Contraseña compartida</label>
+          <input id="wc-secret" type="password" placeholder="La clave del proyecto" value="${attr(state.secret)}" autocomplete="off" />
+          <span class="sub-hint">La misma que definieron en el script. Se guarda solo en este navegador.</span>
+        </div>
+        <div class="form-err" id="wc-err"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-gold" id="wc-go" style="width:100%;justify-content:center">Entrar</button>
+      </div>
+    </div>`);
+
+  const submit = async () => {
+    const name = $("#wc-name").value.trim();
+    const secret = $("#wc-secret").value;
+    const err = $("#wc-err");
+    if (!name)   { err.textContent = "Escribí tu nombre.";      $("#wc-name").focus();   return; }
+    if (!secret) { err.textContent = "Escribí la contraseña.";  $("#wc-secret").focus(); return; }
+    const btn = $("#wc-go"); btn.disabled = true; btn.textContent = "Entrando…"; err.textContent = "";
+    const prevSecret = state.secret;
+    state.secret = secret; state.author = name;
+    try {
+      const entries = await apiList();          // valida la contraseña contra el backend
+      state.entries = entries; state.readOnly = false; state.error = null;
+      localStorage.setItem(LS.cache, JSON.stringify(entries));
+      localStorage.setItem(LS.secret, secret);
+      localStorage.setItem(LS.author, name);
+      closeModal();
+      render();
+    } catch (e) {
+      state.secret = prevSecret;
+      err.textContent = normalizeErr(e);
+      btn.disabled = false; btn.textContent = "Entrar";
+    }
+  };
+  $("#wc-go").addEventListener("click", submit);
+  $("#wc-secret").addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+  $("#wc-name").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#wc-secret").focus(); });
+  setTimeout(() => (state.author ? $("#wc-secret") : $("#wc-name"))?.focus(), 60);
 }
 
 /* ---------- ¿Quién sos? ---------- */
@@ -680,7 +742,8 @@ function toast(msg, kind = "") {
    ============================================================ */
 function boot() {
   if (!apiConfigured()) { renderShell(); openSetupModal(); return; }
-  if (!state.author) { renderShell(); openAuthorModal(true); return; }
+  // URL ya configurada: falta desbloquear con la contraseña y/o poner el nombre
+  if (!state.secret || !state.author) { renderShell(); openWelcomeModal(); return; }
   loadEntries();
 }
 boot();

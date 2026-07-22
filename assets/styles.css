@@ -302,6 +302,9 @@ button, input, textarea, select { font-family: var(--font-ui); font-size: 15px; 
 
 /* ---------- Botón flotante para móvil ---------- */
 .menu-toggle { display: none; }
+/* El scrim (capa oscura del menú móvil) nunca debe ocupar espacio en la grilla:
+   siempre position:fixed y oculto salvo cuando el menú está abierto en móvil. */
+.scrim { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 35; }
 
 /* ============================================================
    Responsive
@@ -313,7 +316,6 @@ button, input, textarea, select { font-family: var(--font-ui); font-size: 15px; 
     transform: translateX(-100%); transition: transform .22s ease; box-shadow: var(--shadow);
   }
   .sidebar.open { transform: translateX(0); }
-  .scrim { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 35; }
   .scrim.show { display: block; }
   .menu-toggle {
     display: inline-flex; align-items: center; justify-content: center;
