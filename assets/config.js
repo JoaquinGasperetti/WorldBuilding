@@ -13,7 +13,7 @@ const CONFIG = {
   // Si la dejás vacía (""), la página te la va a pedir la primera vez
   // y la guarda en tu navegador. Lo ideal es pegarla acá y hacer push,
   // así ya queda lista para vos y para tu hermano sin configurar nada.
-  apiUrl: "",
+  apiUrl: "https://script.google.com/macros/s/AKfycbyMzYJ-jQzlrqLk7VbxXhNXyoBs95Osnb_mFo8zVn0iQK3dn5Wei4LOTrRhZBKkZ9zVZA/exec",
 
   // Categorías del worldbuilding. Podés agregar, quitar o renombrar.
   //   id:    identificador interno, sin espacios ni tildes (no cambiarlo
