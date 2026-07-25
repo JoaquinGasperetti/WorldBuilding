@@ -1,8 +1,19 @@
 # 📖 Enciclopedia del Mundo
 
-Wiki de **worldbuilding** para nuestra novela visual. Página estática (HTML/CSS/JS)
-alojada en **GitHub Pages** que guarda y lee los datos desde una **Hoja de cálculo de
-Google**, para que tanto vos como tu hermano puedan cargar información desde cualquier lado.
+Herramienta de **worldbuilding + guion ramificado** para nuestro videojuego narrativo
+(estilo *Detroit: Become Human*, *Life is Strange*, *Heavy Rain*). Página estática
+(HTML/CSS/JS) en **GitHub Pages** que guarda todo en una **Hoja de cálculo de Google**.
+
+Tiene dos capas:
+
+- **🌍 El Mundo** — personajes, lugares, facciones, especies, objetos, eventos, lore.
+- **🎬 La Historia** — las escenas del juego, sus decisiones y sus finales, *dentro* de ese mundo.
+
+Y tres vistas que se generan **solas** a partir de lo que carguen:
+
+- **🌊 Diagrama de flujo** — el mapa de ramas del guion, dibujado automáticamente.
+- **🕸️ Mapa de relaciones** — quién se conecta con quién en el worldbuilding.
+- **📊 Panel de control** — estadísticas y avisos de cabos sueltos en la historia.
 
 ```
 Navegador (GitHub Pages)  ──►  Google Apps Script  ──►  Google Sheet
@@ -17,9 +28,27 @@ Navegador (GitHub Pages)  ──►  Google Apps Script  ──►  Google Sheet
 |---|---|
 | `index.html` | La página |
 | `assets/styles.css` | Los estilos (tema grimorio oscuro) |
-| `assets/app.js` | Toda la lógica de la app |
+| `assets/app.js` | Lógica de la app (vistas, formularios, datos) |
+| `assets/graph.js` | Motor de diagramas (layout y dibujo, sin librerías) |
 | `assets/config.js` | **Configuración** (nombre, categorías, URL del script) |
 | `apps-script/Codigo.gs` | Código del backend para pegar en Google Apps Script |
+
+---
+
+## ⚠️ Si ya tenías la versión anterior: actualizá el script
+
+La capa narrativa necesita **columnas nuevas** en la hoja. Hay que reemplazar el código del
+Apps Script una vez (los datos que ya tengas **no se pierden**: el script detecta las columnas
+que faltan y las agrega solo).
+
+1. Hoja de Google → **Extensiones → Apps Script**.
+2. Borrá todo y pegá el contenido nuevo de [`apps-script/Codigo.gs`](apps-script/Codigo.gs).
+3. Volvé a poner su contraseña en `const SECRET = "…"`.
+4. **Implementar → Gestionar implementaciones → ✏️ (editar) → Versión: Nueva → Implementar.**
+   La URL no cambia.
+
+Si no lo hacés, la página te lo avisa con un cartel y **no te deja guardar escenas**, para
+que no se pierdan las decisiones.
 
 ---
 
@@ -92,17 +121,70 @@ guarda localmente; nunca se sube al repo.
 
 ## ✍️ Uso diario
 
-- **Buscar:** la barra de arriba busca en nombres, resúmenes, textos y etiquetas.
-- **Categorías:** panel izquierdo (Personajes, Lugares, Facciones, etc.).
+- **Buscar:** la barra de arriba busca en todo (nombres, textos, etiquetas, personajes de una escena…).
 - **Nueva entrada:** botón ✦ arriba a la derecha.
 - **Descripción:** admite Markdown básico → `**negrita**`, `*cursiva*`, `# Título`,
   `- listas`, `> citas`, `[enlace](https://…)`.
 - **Etiquetas:** separadas por coma. Sirven para filtrar dentro de una categoría.
-- **Conexiones:** escribí nombres de otras entradas (separadas por coma). Si existen,
-  quedan como enlaces clickeables entre fichas.
+- **Conexiones:** escribí nombres de otras entradas (por coma). Si existen, quedan como
+  enlaces clickeables **y aparecen en el mapa de relaciones**.
 - **Imágenes:** pegá un **link directo** a una imagen (que termine en `.jpg`, `.png`, etc.).
 
 Los datos quedan en la Hoja de Google → los pueden ver, editar a mano o exportar cuando quieran.
+
+---
+
+## 🎬 Escribir el guion ramificado
+
+El flujo de trabajo pensado es: **primero el mundo, después la historia dentro de ese mundo.**
+
+Cada **Escena** tiene, además de los campos normales:
+
+| Campo | Para qué sirve |
+|---|---|
+| **Tipo** | `Inicio` (por dónde arranca), `Escena`, `Decisión` o `Final`. Define el color en el diagrama. |
+| **Capítulo** | Agrupa escenas. El diagrama se puede filtrar por capítulo. |
+| **Lugar** | Un lugar del worldbuilding (autocompleta). |
+| **Personajes** | Quiénes aparecen (autocompleta). Alimenta el gráfico de presencia del panel. |
+| **Decisiones** | **Lo más importante**: las ramas que salen de la escena. |
+| **Variables que cambia** | Efectos que la escena deja marcados (ej. `confianza+1`). |
+| **Condición para llegar** | Requisito para que esta escena ocurra. |
+
+### Sintaxis de las decisiones
+
+Una opción **por línea**:
+
+```
+Texto que ve el jugador -> Nombre de la escena destino
+```
+
+Podés agregar efectos y condiciones separando con `|`:
+
+```
+Salvar a Alice   -> Huida en el tren  | confianza+1
+Dejarla atrás    -> Solo en la noche  | confianza-1
+Llamar a Kaeron  -> Encuentro tenso   | si: kaeron_vivo=true
+```
+
+- El **destino** se escribe con el **nombre exacto** de otra escena (no importan tildes ni mayúsculas).
+- Mientras escribís, debajo del campo aparece una **vista previa** que te avisa en verde si
+  la escena destino existe y en amarillo si todavía no la creaste.
+- Con eso solo, el **diagrama de flujo se dibuja automáticamente**. No hay que acomodar nada a mano.
+
+### Las tres vistas automáticas
+
+- **🌊 Diagrama de flujo** — arrastrá para moverte, rueda del mouse para acercar, clic en una
+  escena para abrirla. Se puede filtrar por capítulo y alternar vertical/horizontal.
+- **🕸️ Mapa de relaciones** — el worldbuilding como red: pasá el mouse para resaltar vínculos.
+- **📊 Panel de control** — estadísticas (escenas, finales, ramas por decisión) y sobre todo
+  **avisos de diseño**:
+  - opciones que apuntan a una escena que no existe,
+  - escenas sin salida que no están marcadas como final,
+  - escenas huérfanas a las que no se llega desde ninguna decisión,
+  - si falta marcar por dónde arranca el juego.
+
+> 💡 **Consejo:** nombrá los capítulos con número al principio (`01 — Prólogo`, `02 — Ruta`)
+> para que se ordenen solos.
 
 ---
 

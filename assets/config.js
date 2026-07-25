@@ -7,27 +7,44 @@ const CONFIG = {
   siteName: "Nuestro Mundo",
 
   // Subtítulo pequeño debajo del nombre (opcional, dejá "" para ocultarlo).
-  tagline: "Enciclopedia del mundo · Novela visual",
+  tagline: "Worldbuilding & guion ramificado",
 
   // URL de la app web de Google Apps Script (ver README, PASO 3).
-  // Si la dejás vacía (""), la página te la va a pedir la primera vez
-  // y la guarda en tu navegador. Lo ideal es pegarla acá y hacer push,
-  // así ya queda lista para vos y para tu hermano sin configurar nada.
   apiUrl: "https://script.google.com/macros/s/AKfycbyMzYJ-jQzlrqLk7VbxXhNXyoBs95Osnb_mFo8zVn0iQK3dn5Wei4LOTrRhZBKkZ9zVZA/exec",
 
-  // Categorías del worldbuilding. Podés agregar, quitar o renombrar.
-  //   id:    identificador interno, sin espacios ni tildes (no cambiarlo
-  //          una vez que ya cargaste datos con ese id).
-  //   label: el nombre que se muestra.
-  //   icon:  un emoji.
+  // Grupos del menú lateral.
+  groups: [
+    { id: "mundo",    label: "El Mundo" },
+    { id: "historia", label: "La Historia" },
+  ],
+
+  // Categorías. Podés agregar, quitar o renombrar.
+  //   id:        identificador interno (no cambiarlo si ya cargaste datos).
+  //   label:     nombre visible · icon: un emoji · group: a qué grupo pertenece.
+  //   narrative: true → es una escena del guion (aparece en el diagrama de flujo
+  //              y su formulario muestra los campos de decisiones).
   categories: [
-    { id: "personajes", label: "Personajes", icon: "👤" },
-    { id: "lugares",    label: "Lugares",    icon: "🗺️" },
-    { id: "facciones",  label: "Facciones",  icon: "⚔️" },
-    { id: "especies",   label: "Especies",   icon: "🐉" },
-    { id: "objetos",    label: "Objetos",    icon: "💎" },
-    { id: "eventos",    label: "Eventos",    icon: "📜" },
-    { id: "lore",       label: "Lore",       icon: "📖" },
-    { id: "notas",      label: "Notas",      icon: "🗒️" },
+    // ---- El Mundo (worldbuilding) ----
+    { id: "personajes", label: "Personajes", icon: "👤",  group: "mundo" },
+    { id: "lugares",    label: "Lugares",    icon: "🗺️", group: "mundo" },
+    { id: "facciones",  label: "Facciones",  icon: "⚔️", group: "mundo" },
+    { id: "especies",   label: "Especies",   icon: "🐉", group: "mundo" },
+    { id: "objetos",    label: "Objetos",    icon: "💎", group: "mundo" },
+    { id: "eventos",    label: "Eventos",    icon: "📜", group: "mundo" },
+    { id: "lore",       label: "Lore",       icon: "📖", group: "mundo" },
+    { id: "notas",      label: "Notas",      icon: "🗒️", group: "mundo" },
+
+    // ---- La Historia (guion del videojuego) ----
+    { id: "escenas",    label: "Escenas",    icon: "🎬", group: "historia", narrative: true },
+    { id: "capitulos",  label: "Capítulos",  icon: "📕", group: "historia" },
+    { id: "variables",  label: "Variables",  icon: "🎚️", group: "historia" },
+  ],
+
+  // Tipos de escena para el diagrama de flujo (podés renombrar los label).
+  sceneTypes: [
+    { id: "inicio",   label: "Inicio",   icon: "▶",  color: "#6fbf83" },
+    { id: "escena",   label: "Escena",   icon: "🎬", color: "#8a7bff" },
+    { id: "decision", label: "Decisión", icon: "◆",  color: "#d8b16a" },
+    { id: "final",    label: "Final",    icon: "🏁", color: "#c8703a" },
   ],
 };
